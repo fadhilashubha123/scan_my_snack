@@ -1,25 +1,51 @@
 <?php
 include 'db.php';
 
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+        if (isset($_POST['create'])) {
+        $name = $_POST['name'];
+        $sugar = $_POST['sugar'];
+        $fat = $_POST['fat'];
+        $calories = $_POST['calories'];
+        $evaluation = $_POST['evaluation'];
 
-function evaluasiSnack($sugar, $fat, $calories) {
-    if ($sugar > 20 || $fat > 15 || $calories > 250) {
-        return "Tidak Sehat";
-    } else {
-        return "Sehat";
+        // Simpan ke database
+        $stmt = $conn->prepare("INSERT INTO snack (name, sugar, fat, calories, evaluation) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("sddds", $name, $sugar, $fat, $calories, $evaluation);
+        $stmt->execute();
+        $stmt->close();
+
+        // Redirect kembali ke halaman utama
+        header("Location: index.php");
+        exit();
+    }
+
+    if (isset($_POST['update'])) {
+        $id = intval($_POST['id']);
+        $name = $_POST['name'];
+        $sugar = $_POST['sugar'];
+        $fat = $_POST['fat'];
+        $calories = $_POST['calories'];
+        $evaluation = $_POST['evaluation'];
+
+        $stmt = $conn->prepare("UPDATE pasien SET name = ?, sugar = ?, fat = ?, calories = ?, evaluation= ? WHERE id = ?");
+        $stmt->bind_param("sissi", $name, $sugar, $fat, $calories, $evaluation, $id);
+        $stmt->execute();
+        $stmt->close();
+
+        header('Location: index.php');
+        exit;
     }
 }
 
-if (isset($_POST['create'])) {
-    $nama = $_POST['snackName'];
-    $sugar = $_POST['sugar'];
-    $fat = $_POST['fat'];
-    $calories = $_POST['calories'];
-    $hasil = evaluasiSnack($sugar, $fat, $calories);
-
-    $stmt = $conn->prepare("INSERT INTO snack_history (nama, gula, lemak, kalori, hasil) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("siiis", $nama, $sugar, $fat, $calories, $hasil);
+if (isset($_GET['delete_id'])) {
+    $id = intval($_GET['delete_id']);
+    $stmt = $conn->prepare("DELETE FROM pasien WHERE id = ?");
+    $stmt->bind_param("i", $id);
     $stmt->execute();
-    header("Location: index.php");
+    $stmt->close();
+
+    header('Location: index.php');
+    exit;
 }
 ?>
