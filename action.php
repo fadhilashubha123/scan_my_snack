@@ -1,7 +1,6 @@
 <?php
 include 'db.php';
 
-// test dari hirzi
 
 function evaluasiSnack($sugar, $fat, $calories) {
     if ($sugar > 20 || $fat > 15 || $calories > 250) {
