@@ -1,16 +1,54 @@
-<?
-include 'db.php';
+<?php
+include 'db.php'; // Koneksi ke database
 
-$editSnack = null;
-if (isset($_GET['edit_id'])) {
-    $edit_id = intval($_GET['edit_id']);
-    $stmt = $conn->prepare("SELECT * FROM history WHERE id = ?");
-    $stmt->bind_param("i", $edit_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $editSnack = $result->fetch_assoc();
-    $stmt->close();
+// Fungsi untuk mengevaluasi snack
+function evaluateSnack($sugar, $fat, $calories) {
+    if ($sugar > 20 || $fat > 15 || $calories > 500) {
+        return "Tidak Sehat";
+    } else if ($sugar <= 5 && $fat <= 5 && $calories <= 200) {
+        return "Sangat Sehat";
+    } else {
+        return "Cukup Sehat";
+    }
+	
 }
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $name = $_POST['name'];
+    $sugar = (float)$_POST['sugar'];
+    $fat = (float)$_POST['fat'];
+    $calories = (float)$_POST['calories'];
+
+
+    $evaluation = evaluateSnack($sugar, $fat, $calories);
+
+    $stmt = $conn->prepare("SELECT COUNT(*) FROM snacks WHERE name = ? AND sugar = ? AND fat = ? AND calories = ?");
+    $stmt->bind_param("sddd", $name, $sugar, $fat, $calories);
+    $stmt->execute();
+    $stmt->bind_result($count);
+    $stmt->fetch();
+    $stmt->close();
+
+    if ($count == 0) { 
+        $stmt = $conn->prepare("INSERT INTO snacks (name, sugar, fat, calories, evaluation) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("sddds", $name, $sugar, $fat, $calories, $evaluation);
+
+        if ($stmt->execute()) {
+            $message = "Snack berhasil ditambahkan ke histori dengan evaluasi: $evaluation";
+        } else {
+            $message = "Terjadi kesalahan: " . $stmt->error;
+        }
+        $stmt->close();
+
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit;
+    } else {
+        $message = "Snack sudah ada dalam histori.";
+    }
+}
+
+
+$result = $conn->query("SELECT * FROM snacks ORDER BY created_at DESC");
 ?>
 
 
@@ -114,7 +152,7 @@ if (isset($_GET['edit_id'])) {
 					<!-- Home -->
 
 					<div class="home d-flex flex-column align-items-start justify-content-end">
-						<!-- <div class="background_image" style="background-image:url(images/about.jpg)"></div> -->
+						<div class="background_image" style="background-image:url(images/about.jpg)"></div>
 						<div class="parallax_background parallax-window" data-parallax="scroll" data-image-src="images/about.jpg" data-speed="0.8"></div>
 						<div class="home_overlay"><img src="images/home_overlay.png" alt=""></div>
 						<div class="home_container">
@@ -134,95 +172,187 @@ if (isset($_GET['edit_id'])) {
 
 					<!-- Intro -->
 
-<div class="intro">
-    <div class="container">
-    <h1>Check Your Snack</h1>
-    <label for="snackName">Nama Camilan:</label>
-    <input type="text" id="snackName" placeholder="Contoh: Keripik Kentang">
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Check Your Snack</h2>
+    <?php if (isset($message)) { echo "<div class='alert alert-info'>$message</div>"; } ?>
 
-    <label for="sugar">Kadar Gula (gram):</label>
-    <input type="number" id="sugar" placeholder="Contoh: 15">
+    <form method="POST" class="mb-5">
+        <div class="form-group">
+            <label for="name">Nama Snack:</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="sugar">Kadar Gula (gram):</label>
+            <input type="number" step="0.01" class="form-control" id="sugar" name="sugar" required>
+        </div>
+        <div class="form-group">
+            <label for="fat">Lemak Total (gram):</label>
+            <input type="number" step="0.01" class="form-control" id="fat" name="fat" required>
+        </div>
+        <div class="form-group">
+            <label for="calories">Kalori (kcal):</label>
+            <input type="number" step="0.01" class="form-control" id="calories" name="calories" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Check Your Snack</button>
+    </form>
 
-    <label for="fat">Lemak Total (gram):</label>
-    <input type="number" id="fat" placeholder="Contoh: 10">
-
-    <label for="calories">Kalori (kcal):</label>
-    <input type="number" id="calories" placeholder="Contoh: 180">
-
-    <button onclick="evaluateSnack()">Evaluasi Camilan</button>
-
-    <div id="result" class="result"></div>
-
-    <h2>Histori Evaluasi Camilan</h2>
-    <table id="snackTable">
-        <thead>
+    <!-- Histori Snack -->
+    <h2 class="text-center mb-4">Histori Snack</h2>
+    <table class="table table-bordered table-striped table-hover">
+        <thead class="thead-dark">
             <tr>
                 <th>No</th>
-                <th>Nama Camilan</th>
-                <th>Kadar Gula (gram)</th>
-                <th>Lemak Total (gram)</th>
-                <th>Kalori (kcal)</th>
+                <th>ID</th>
+                <th>Nama</th>
+                <th>Kadar Gula</th>
+                <th>Lemak</th>
+                <th>Kalori</th>
                 <th>Evaluasi</th>
+                <th>Waktu Dibuat</th>
+				<th>Action</th>
             </tr>
         </thead>
         <tbody>
-            <!-- Rows akan ditambahkan secara dinamis -->
+            <?php 
+			$no = 1; 
+			while ($row = $result->fetch_assoc()) { 
+				$customId = 'SNCK' . str_pad($row['id'], 3, '0', STR_PAD_LEFT);
+			?>
+				<tr>
+					<td><?= $no ?></td>
+					<td><?= $customId ?></td>
+					<td><?= $row['name'] ?></td>
+					<td><?= $row['sugar'] ?> g</td>
+					<td><?= $row['fat'] ?> g</td>
+					<td><?= $row['calories'] ?> kcal</td>
+					<td><strong><?= $row['evaluation'] ?></strong></td>
+					<td><?= $row['created_at'] ?></td>
+					<td class="d-flex gap-5">
+						<form method="POST" action="action.php" class="d-inline">
+							<input type="hidden" name="action" value="delete">
+							<input type="hidden" name="id" value="<?= $row['id'] ?>">
+							<button 
+								type="submit"
+								class="btn btn-danger btn-sm me-2"
+								onclick="return confirm('Are you sure you want to delete this item?')">Delete
+							</button>
+						</form>
+						<button 
+							class="btn btn-warning btn-sm" 
+							onclick="editSnack(<?= $row['id'] ?>, '<?= $row['name'] ?>', <?= $row['sugar'] ?>, <?= $row['fat'] ?>, <?= $row['calories'] ?>)">
+							Edit
+						</button>
+					</td>
+				</tr>
+			<?php 
+				$no++; 
+			} 
+			?>
         </tbody>
     </table>
 </div>
+
+<!-- Modal Edit Snack -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Snack</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="action" value="edit">
+                    <input type="hidden" name="id" id="editId">
+                    <div class="form-group">
+                        <label for="editName">Nama Snack:</label>
+                        <input type="text" class="form-control" id="editName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editSugar">Kadar Gula (gram):</label>
+                        <input type="number" step="0.01" class="form-control" id="editSugar" name="sugar" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editFat">Lemak Total (gram):</label>
+                        <input type="number" step="0.01" class="form-control" id="editFat" name="fat" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editCalories">Kalori (kcal):</label>
+                        <input type="number" step="0.01" class="form-control" id="editCalories" name="calories" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
+
+
 <script>
-    let snackCounter = 1;
 
-    function evaluateSnack() {
-        const name = document.getElementById('snackName').value;
-        const sugar = parseFloat(document.getElementById('sugar').value);
-        const fat = parseFloat(document.getElementById('fat').value);
-        const calories = parseFloat(document.getElementById('calories').value);
-        const resultDiv = document.getElementById('result');
-        const snackTable = document.getElementById('snackTable').querySelector('tbody');
+function editSnack(id, name, sugar, fat, calories) {
+    document.getElementById('editId').value = id;
+    document.getElementById('editName').value = name;
+    document.getElementById('editSugar').value = sugar;
+    document.getElementById('editFat').value = fat;
+    document.getElementById('editCalories').value = calories;
 
-        // Validasi input
-        if (!name || isNaN(sugar) || isNaN(fat) || isNaN(calories)) {
-            resultDiv.innerHTML = 'Mohon isi semua kolom dengan data yang valid.';
-            resultDiv.className = 'result unhealthy';
-            return;
-        }
+    // Tampilkan modal
+    $('#editModal').modal('show');
+}
 
-        let score = 0;
 
-        // Evaluasi sederhana
-        if (sugar <= 5) score++;
-        if (fat <= 5) score++;
-        if (calories <= 150) score++;
-
-        const evaluation = score >= 2 ? 'Sehat' : 'Tidak Sehat';
-
-        resultDiv.innerHTML = score >= 2
-            ? '✅ Camilan ini tergolong <strong>cukup sehat</strong>!'
-            : '⚠️ Camilan ini tergolong <strong>tidak sehat</strong>. Kurangi konsumsi berlebihan.';
-        resultDiv.className = score >= 2 ? 'result healthy' : 'result unhealthy';
-
-        // Tambahkan baris baru ke tabel
-        const newRow = snackTable.insertRow();
-        newRow.innerHTML = `
-            <td>${snackCounter++}</td>
-            <td>${name}</td>
-            <td>${sugar}</td>
-            <td>${fat}</td>
-            <td>${calories}</td>
-            <td>${evaluation}</td>
-        `;
+function confirmDelete(id) {
+    if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+        window.location.href = `action.php?action=delete&id=${id}`;
     }
+}
+
+function deleteSnack(id) {
+    if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+        fetch('action.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ action: 'delete', id: id })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Hapus elemen baris dari tabel
+                document.querySelector(`tr[data-id='${id}']`).remove();
+            } else {
+                alert("Gagal menghapus data: " + data.message);
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Terjadi kesalahan saat menghapus data.");
+        });
+    }
+}
+
+window.addEventListener("beforeunload", function () {
+    localStorage.setItem("scrollPosition", window.scrollY);
+});
+
+window.addEventListener("load", function () {
+    const scrollPosition = localStorage.getItem("scrollPosition");
+    if (scrollPosition) {
+        window.scrollTo(0, parseInt(scrollPosition));
+        localStorage.removeItem("scrollPosition");
+    }
+});
+
+
 </script>
-
-
-
-
-
-
-	<!-- Testimonials -->
 
 	<div class="testimonials">
 		<div class="container">
