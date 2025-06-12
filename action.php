@@ -1,6 +1,7 @@
 <?php
 include 'db.php';
 
+// putri unyu
 
 function evaluasiSnack($sugar, $fat, $calories) {
     if ($sugar > 20 || $fat > 15 || $calories > 250) {
