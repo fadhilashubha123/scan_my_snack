@@ -1,26 +1,66 @@
 <?php
-include 'db.php';
+include 'db.php'; // Koneksi ke database
 
+<<<<<<< HEAD
 // putri unyu
+=======
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action']; // 'update' atau 'delete'
 
-function evaluasiSnack($sugar, $fat, $calories) {
-    if ($sugar > 20 || $fat > 15 || $calories > 250) {
-        return "Tidak Sehat";
+    if ($action === 'update') {
+        $id = (int)$_POST['id'];
+        $name = $_POST['name'];
+        $sugar = (float)$_POST['sugar'];
+        $fat = (float)$_POST['fat'];
+        $calories = (float)$_POST['calories'];
+
+        // Evaluasi ulang snack
+        $evaluation = evaluateSnack($sugar, $fat, $calories);
+
+        // Update data snack
+        $stmt = $conn->prepare("UPDATE snacks SET name = ?, sugar = ?, fat = ?, calories = ?, evaluation = ? WHERE id = ?");
+        $stmt->bind_param("sdddsi", $name, $sugar, $fat, $calories, $evaluation, $id);
+
+        if ($stmt->execute()) {
+            $response = ["status" => "success", "message" => "Data berhasil diperbarui"];
+        } else {
+            $response = ["status" => "error", "message" => "Gagal memperbarui data: " . $stmt->error];
+        }
+        $stmt->close();
+
+    } elseif ($action === 'delete') {
+        $id = (int)$_POST['id'];
+
+        // Hapus data snack
+        $stmt = $conn->prepare("DELETE FROM snacks WHERE id = ?");
+        $stmt->bind_param("i", $id);
+
+        if ($stmt->execute()) {
+            $response = ["status" => "success", "message" => "Data berhasil dihapus"];
+        } else {
+            $response = ["status" => "error", "message" => "Gagal menghapus data: " . $stmt->error];
+        }
+        $stmt->close();
+>>>>>>> 3b35c50e71180e0e742be4ccfce4ac8cedea4fcd
+
     } else {
-        return "Sehat";
+        $response = ["status" => "error", "message" => "Aksi tidak valid"];
     }
+
+
+    header('Location: about.php');
+    echo json_encode($response);
+    exit;
 }
 
-if (isset($_POST['create'])) {
-    $nama = $_POST['snackName'];
-    $sugar = $_POST['sugar'];
-    $fat = $_POST['fat'];
-    $calories = $_POST['calories'];
-    $hasil = evaluasiSnack($sugar, $fat, $calories);
-
-    $stmt = $conn->prepare("INSERT INTO snack_history (nama, gula, lemak, kalori, hasil) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("siiis", $nama, $sugar, $fat, $calories, $hasil);
-    $stmt->execute();
-    header("Location: index.php");
+// Fungsi evaluasi snack
+function evaluateSnack($sugar, $fat, $calories) {
+    if ($sugar > 20 || $fat > 15 || $calories > 500) {
+        return "Tidak Sehat";
+    } elseif ($sugar <= 5 && $fat <= 5 && $calories <= 200) {
+        return "Sangat Sehat";
+    } else {
+        return "Cukup Sehat";
+    }
 }
 ?>

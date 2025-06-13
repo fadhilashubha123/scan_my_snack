@@ -275,9 +275,6 @@
 				<!-- Work Hourse -->
 				<div class="work_hours">Mo - Sat: 8:00am - 9:00pm</div>
 
-				<!-- Header Phone -->
-				<div class="header_phone">+34 586 778 8892</div>
-
 				<!-- Login Button -->
 				<div class="button button_1 header_button"><a href="#">Login</a></div>
 
@@ -344,7 +341,7 @@
 	</div>
 
         <div class="filter-section">
-            <h3><i class="fas fa-filter"></i> Filter Artikel</h3>
+            <h3>Filter Artikel</h3>
             <div class="filter-buttons">
                 <button class="filter-btn active" onclick="filterArticles('all')">Semua</button>
                 <button class="filter-btn" onclick="filterArticles('anak')">Snack Anak</button>
