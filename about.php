@@ -104,8 +104,6 @@ $result = $conn->query("SELECT * FROM snacks ORDER BY created_at DESC");
 				<!-- Work Hourse -->
 				<div class="work_hours">Mo - Sat: 8:00am - 9:00pm</div>
 
-				<!-- Header Phone -->
-				<div class="header_phone">+34 586 778 8892</div>
 
 				<!-- Login Button -->
 				<div class="button button_1 header_button"><a href="#">Login</a></div>
