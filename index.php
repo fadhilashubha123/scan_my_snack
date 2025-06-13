@@ -109,7 +109,6 @@ function tampilkanHistory($conn) {
 
             <div class="header_extra d-flex flex-row align-items-center justify-content-end ml-auto">
                 <div class="work_hours">Mo - Sat: 8:00am - 9:00pm</div>
-                <div class="header_phone">+34 586 778 8892</div>
                 <div class="button button_1 header_button"><a href="#">Login</a></div>
                 <div class="social header_social">
                     <ul class="d-flex flex-row align-items-center justify-content-start">
