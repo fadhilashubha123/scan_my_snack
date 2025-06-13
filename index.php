@@ -99,8 +99,8 @@ function tampilkanHistory($conn) {
 
             <nav class="main_nav">
                 <ul class="d-flex flex-row align-items-center justify-content-start">
-                    <li><a href="index.php">Beranda</a></li>
-                    <li class="active"><a href="about.php">Evaluasi Camilan</a></li>
+                    <li class="active"><a href="index.php">Beranda</a></li>
+                    <li ><a href="about.php">Evaluasi Camilan</a></li>
                     <li><a href="services.php">Rekomendasi</a></li>
                     <li><a href="blog.php">News</a></li>
                     <li><a href="contact.php">Tentang Kami</a></li>
@@ -165,56 +165,6 @@ function tampilkanHistory($conn) {
             </div>
         </div>
     </div>
-
-    <!-- Evaluasi Form -->
-    <div class="intro">
-        <div class="container">
-            <h1>Check Your Snack</h1>
-            <label for="snackName">Nama Camilan:</label>
-            <input type="text" id="snackName" placeholder="Contoh: Keripik Kentang">
-
-            <label for="sugar">Kadar Gula (gram):</label>
-            <input type="number" id="sugar" placeholder="Contoh: 15">
-
-            <label for="fat">Lemak Total (gram):</label>
-            <input type="number" id="fat" placeholder="Contoh: 10">
-
-            <label for="calories">Kalori (kcal):</label>
-            <input type="number" id="calories" placeholder="Contoh: 180">
-
-            <button onclick="evaluateSnack()">Evaluasi Camilan</button>
-            <div id="result" class="result"></div>
-        </div>
-    </div>
-
-	<div class="container mt-5">
-    <h2>Riwayat Evaluasi Camilan</h2>
-    <table>
-    <thead>
-        <tr><th>No</th><th>Nama</th><th>Gula</th><th>Lemak</th><th>Kalori</th><th>Hasil</th><th>Aksi</th></tr>
-    </thead>
-    <tbody>
-        <?php
-        $result = $conn->query("SELECT * FROM snack_history");
-        $no = 1;
-        while ($row = $result->fetch_assoc()) {
-            echo "<tr>
-                <td>{$no}</td>
-                <td>{$row['nama']}</td>
-                <td>{$row['gula']}</td>
-                <td>{$row['lemak']}</td>
-                <td>{$row['kalori']}</td>
-                <td>{$row['hasil']}</td>
-                <td>
-                    <a href='?edit_id={$row['id']}'>Edit</a> |
-                    <a href='action_snack.php?delete_id={$row['id']}' onclick=\"return confirm('Yakin?')\">Hapus</a>
-                </td>
-            </tr>";
-            $no++;
-        }
-        ?>
-    </tbody>
-</table>
 
 </div>
 

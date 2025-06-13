@@ -440,7 +440,6 @@
 		<div class="footer_content">
 			<div class="container">
 				<div class="row">
-
 					<!-- Footer About -->
 					<div class="col-lg-3 footer_col">
 						<div class="footer_about">
@@ -485,7 +484,6 @@ Mulai sekarang dan buat pilihan ngemil yang lebih cerdas!</p>
 							</ul>
 						</div>
 					</div>
-
 				</div>
 			</div>
 		</div>
