@@ -344,7 +344,7 @@
 	</div>
 
         <div class="filter-section">
-            <h3><i class="fas fa-filter"></i> Filter Artikel</h3>
+            <h3>Filter Artikel</h3>
             <div class="filter-buttons">
                 <button class="filter-btn active" onclick="filterArticles('all')">Semua</button>
                 <button class="filter-btn" onclick="filterArticles('anak')">Snack Anak</button>

@@ -99,8 +99,8 @@ function tampilkanHistory($conn) {
 
             <nav class="main_nav">
                 <ul class="d-flex flex-row align-items-center justify-content-start">
-                    <li><a href="index.php">Beranda</a></li>
-                    <li class="active"><a href="about.php">Evaluasi Camilan</a></li>
+                    <li class="active"><a href="index.php">Beranda</a></li>
+                    <li><a href="about.php">Evaluasi Camilan</a></li>
                     <li><a href="services.php">Rekomendasi</a></li>
                     <li><a href="blog.php">News</a></li>
                     <li><a href="contact.php">Tentang Kami</a></li>
@@ -195,14 +195,14 @@ function tampilkanHistory($conn) {
     </thead>
     <tbody>
         <?php
-        $result = $conn->query("SELECT * FROM snack_history");
+        $result = $conn->query("SELECT * FROM history");
         $no = 1;
         while ($row = $result->fetch_assoc()) {
             echo "<tr>
                 <td>{$no}</td>
-                <td>{$row['nama']}</td>
-                <td>{$row['gula']}</td>
-                <td>{$row['lemak']}</td>
+                <td>{$row['nama_snack']}</td>
+                <td>{$row['kadar_gula']}</td>
+                <td>{$row['lemak_total']}</td>
                 <td>{$row['kalori']}</td>
                 <td>{$row['hasil']}</td>
                 <td>

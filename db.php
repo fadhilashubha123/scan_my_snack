@@ -3,7 +3,7 @@
 $host = 'localhost';
 $user = 'root';
 $password = '';
-$dbname = 'scan_your_snack';
+$dbname = 'check_your_snack';
 
 $conn = new mysqli($host, $user, $password, $dbname);
 if ($conn->connect_error) {
